@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -x
+#set -x
 echo $0
  
 if [ -n "$windir" ]; then
@@ -316,7 +316,6 @@ function setup_ssh() {
 	
 SSH_CONFIG=$(cat <<EOF
 Host *
-    IdentitiesOnly yes
 	PubkeyAcceptedKeyTypes +ssh-dss
     StrictHostKeyChecking accept-new
 
@@ -325,14 +324,12 @@ Host github.com
         Hostname github.com
         Port 22
         ${PROXY_CMD}
-        IdentityFile ~/.ssh/id_srvdeploy
 
 Host gitlab.com
         User git
         Hostname gitlab.com
         Port 22
         ${PROXY_CMD}
-        IdentityFile ~/.ssh/id_srvdeploy
 EOF
 )
 	echo "$SSH_CONFIG" > $SSH_HOME/.ssh/config
@@ -343,10 +340,8 @@ KNOWN_HOSTS=$(cat <<EOF
 EOF
 )
 	echo "$KNOWN_HOSTS" >> $SSH_HOME/.ssh/known_hosts
-	
-	add_key_ecdsa
-	add_key_srvdeploy
-	
+
+
 }
 function unlock_git() {
 	echo ${FUNCNAME[0]}
@@ -514,99 +509,6 @@ function setup_salt_dir() {
 	fi
 	return 0
 }
-function add_key_ecdsa() {
-		echo ${FUNCNAME[0]}
-SSH_ID_FILE=$(cat <<EOF	
------BEGIN OPENSSH PRIVATE KEY-----
-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
------END OPENSSH PRIVATE KEY-----
-EOF
-)
-echo "$SSH_ID_FILE" >$SSH_HOME/.ssh/id_ssh_jump
-	chmod 0600 $SSH_HOME/.ssh/id_ssh_jump
-}
-function add_key_srvdeploy() {
-		echo ${FUNCNAME[0]}
-SSH_ID_FILE=$(cat <<EOF	
------BEGIN RSA PRIVATE KEY-----
-MIIEogIBAAKCAQEAjjqRaSP9sY/rRzfzdsEXYSpJC5gC2UqVEUZDlfQeQvxiFcz3
-btM9IKj09E1/1ewxL7kFUSab2oyZuFuH27j6b0y8wwSpSxE/Z84LJqmGBxWXxgia
-O6a7jxGKRY/uK8eJWwq4koYlQ+K9YPF5bZqhm5E4ycZZ1O9WEpdLytp7AlyNmnBk
-TxeIQlmwICaIgcjG1JniPV5RET8P/bIhui+QzFODd0qfkkZ9b9s0uhnzpFggx+OJ
-1V7TVtLtYEdAaEElAZrXlp8Qs4NPt28ThhD4mJuD2xM/RhmVb8oVNpiQGUxTp1xr
-bBvljuVTa7166ZqqFTO4kwBqOalfu/LlpLiL7wIBJQKCAQAqSMNySPhlOJ/kvZto
-fpg/e0YmCpkQKu4MDfhq2d97stENZnMTHDTEhUHnxANpHLStUq6Nv17Ebv1EpZcX
-zzWyYuwCoIVbgasRBeejtdu86r5rTqpkwt3QloMNwwGeUBQUJcgrj6o2xt5bF1tz
-nKyWCJRXqawBCOI84N8ueE4VdQCF4PI6wW/3u4KlW5PV7X7LyeHN0Ki6EFLHn43p
-5WTkxvFyPSz1zsBXyIRE5S1wAAkodAe5xuccwefS3bEJpjKVDGCnTN2N4ycZG+Q4
-feXZKzWTMio/jxfdOhV5RJh/No4yH7AtouA4nqhC67pgzaQPJ19iQtAJRw5YTfwd
-8j5FAoGBAPp7hC3gS+WBjo185hiVoVZu4C+nUJJ39X+jY5WrwcX+bE7AqdiChi/c
-ChkHFGMfIYJydviBuZRx+t5FiT0YZJvFk0wXhurp6gtSIENPEDnpXa/b0i8UK1TZ
-m7EeR2z4cJuRmC1gZewwHG3s9BcoJTfem/3C5wVtHycOqXr5d6DzAoGBAJFcmnwG
-QPuWyMhIgMR5q4AVWHU+24cQKe5Ge6613o61G3zwjS/U8ZgPdHYRGfevZQsqceu0
-NsEnBgNVdzt1OSTpmBfX/lPVEZJWqy2nh9DUw8KzDLCh9ap/gkppJJaMO3yy/JBa
-7zW3m/VX3wgewb69zXn58teWD5QP5gNdzEgVAoGBAJu0kG+LbXL9giCZv3cQ58Ab
-aMOtMhXb3cviG08zap2r/iMd0V0S3cq5NrWcnfhtTC5+gU5eekeFH2eTAkiSn2fA
-AZ4AyX1FTEw5+GExJcMiXNUZ8VuJFARP6yjpTv6MmQbCSdcEkmJjGJdb8a2HqG7W
-fKSplobVITP0W4PLgbcTAoGANwBxzhA0Q4UpYIoi4o7m8jGXF5s+TsfYg6v3cooB
-LxQYPRy/zOjKHdxVlHUsa455Qn7DUkQwZMKoVEnaFn9huvCaaeMGSTvdIp1VhuVx
-qPaPQsBJ/aUQ2LqgAHrPkujz6f6JFAa7YG78vbKLveIfy6HDXpXtLvqCb1/2KsmL
-kOUCgYEAovycqxP4ouP4cp//o1Rs9goXHWhzpnz/vhQC94VL8Eavzbcc1b3c+OEl
-n9A2poAlcRyxfYCCvHoSsLnGLDsvxDXuArXGliLbOI24A4L2iQ6yesiVlYGc1J5J
-oZAjnzMQOxaJHaUfMdkR6pqYDZNOIlqjQB/q9xbH/T/xzB/7owQ=
------END RSA PRIVATE KEY-----
-EOF
-)
-	echo "$SSH_ID_FILE" >$SSH_HOME/.ssh/id_tulipdeploy
-	chmod 0600 $SSH_HOME/.ssh/id_tulipdeploy
-}
-
 function load_secret_key_from_ssh_agent() {
 	echo ${FUNCNAME[0]}
 
