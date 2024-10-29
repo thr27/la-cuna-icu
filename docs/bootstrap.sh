@@ -22,6 +22,6 @@ if [ ! $(hostname -f)  != "$FQDN" ]; then
 
     hostnamectl set-hostname ${FQDN}
 fi
-
-[ ! -f $SCRIPTPATH/salt.sh ] && wget -O $SCRIPTPATH/salt.sh https://thr27.github.io/la-cuna-icu/scripts/salt.sh
-[ -f $SCRIPTPATH/salt.sh ] && chmod +x $SCRIPTPATH/salt.sh
+[ ! -d $SCRIPTPATH/scripts ] && mkdir $SCRIPTPATH/scripts 
+[ ! -f $SCRIPTPATH/scripts/salt.sh ] && wget -O $SCRIPTPATH/scripts/salt.sh https://thr27.github.io/la-cuna-icu/scripts/salt.sh
+[ -f $SCRIPTPATH/scripts/salt.sh ] && chmod +x $SCRIPTPATH/scripts/salt.sh

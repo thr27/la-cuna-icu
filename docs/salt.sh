@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-set -x
+#set -x
 echo $0
- 
+
 if [ -n "$windir" ]; then
 	echo "ERROR not in windows... use salt.cmd"
 	exit 1
@@ -22,7 +22,6 @@ CONFIG_BRANCH=master
 
 # Time from Google
 # date -s "$(curl -sD - google.com | grep '^Date:' | cut -d' ' -f3-6)Z"
-
 function version_check() {
 	local current_hash
     local remote_hash
@@ -36,9 +35,9 @@ function version_check() {
 
     # Compare the hashes
     if [ "$current_hash" != "$remote_hash" ]; then
-        echo "Notice: The script has been updated. Please update your local version. (local: $current_hash, remote: $remote_hash)"
+        echo "Notice: The script has been updated. Please update your local version."
 		if ok "Update script?"; then
-			self_upd_script=$(cat <<EOF
+		self_upd_script=$(cat <<EOF
 pushd .
 cd
 wget -O- https://thr27.github.io/la-cuna-icu/scripts/salt.sh > $SCRIPTPATH/salt.sh
@@ -46,9 +45,8 @@ popd
 echo "salt.sh was updated ..."
 EOF
 )
-			echo "$self_upd_script" > /tmp/upd_salt_sh.sh && chmod +x /tmp/upd_salt_sh.sh
-			exec /tmp/upd_salt_sh.sh
-		fi
+				echo "$self_upd_script" > /tmp/upd_salt_sh.sh && chmod +x /tmp/upd_salt_sh.sh
+				exec /tmp/upd_salt_sh.sh
     else
         echo "The script is up to date."
     fi
