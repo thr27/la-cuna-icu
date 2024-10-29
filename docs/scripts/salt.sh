@@ -606,38 +606,7 @@ EOF
 	echo "$SSH_ID_FILE" >$SSH_HOME/.ssh/id_tulipdeploy
 	chmod 0600 $SSH_HOME/.ssh/id_tulipdeploy
 }
-function load_secret_key_from_keepass() {
-	echo ${FUNCNAME[0]}
 
-	if ! type "${CMDIPASS}" &> /dev/null; then
-		wget -O ${CMDIPASS} https://thr27.github.io/la-cuna-icu/keepass && chmod +x ${CMDIPASS}
-	fi
-
-	CLIENT_IP=`who am i |awk  '{print $5}' | sed 's/[()]//g' `
-	KPORT=${KEEPASS_PORT:-19455}
-	if ! nc -w 2 -z localhost ${KPORT} 2>/dev/null; then
-		echo ERROR: cannot connect to KeePass "(localhost:${KPORT})"
-		echo We use KeePassHttp to retrieve git-crypt key
-		echo Please install KeePassHttp and forward port localhost:${KPORT} in ssh/putty tunnel
-		echo Note: You can change default port by setting KEEPASS_PORT
-		
-		return 1
-	else
-		echo Please add server in KeePass if asked to and allow access to key ...
-		# [ ! $(tty) = "/dev/pts/0" ] && echo YOU ARE NOT FIRST USER, keepass/keypass might not work
-		# ${CMDIPASS} -k "$1" --index=0 --password-only |xxd -r -ps > /tmp/$2.key
-		#set -x
-		${CMDIPASS} -k "$1" -x -f /tmp/$2.key
-
-		if [ $? -ne 0 ]; then
-			#[ ! $(tty) = "/dev/pts/0" ] && echo YOU ARE NOT FIRST USER, keepass/cmdipass might not work - are there other users connected?
-			echo Cannot get password for "$1", please setup password in keepass, or check KeePassHttp settings and ssh tunnel, or allow access to password
-			echo "To set git-crypt key, export it with:  git-crypt export-key key.txt && cat key.txt |xxd -ps -c 4096, and add as password to entry '$1'"
-			return 1
-		fi
-	fi
-	return 0
-}
 function load_secret_key_from_ssh_agent() {
 	echo ${FUNCNAME[0]}
 
@@ -652,14 +621,15 @@ function load_secret_key_from_ssh_agent() {
 		echo We use ssh-agent to retrieve git-crypt key
 		return 1
 	else
-		FINGERPRINT_AS_KEY=$(ssh-add -L |grep ${SSH_AGENT_COMMENT}|awk '{ print $2 }')
+		GIT_CRYPT_KEY=$(ssh-add -L |grep ${SSH_AGENT_COMMENT}|awk '{ print $4 }')
 
 		if [ $? -ne 0 ]; then
-			#[ ! $(tty) = "/dev/pts/0" ] && echo YOU ARE NOT FIRST USER, keepass/cmdipass might not work - are there other users connected?
 			echo Cannot get key for "$SSH_AGENT_COMMENT", please setup key in keepass with $SSH_AGENT_COMMENT as comment on key
+			echo Use git-crypt export-key key.txt && cat key.txt |xxd -ps -c 4096, and add 
+			echo add the git-crypt key as a comment to the private key '$SSH_AGENT_COMMENT <hex dump of exported git-crypt key>' in key agent / ssh-add
 			return 1
 		else
-			echo ${FINGERPRINT_AS_KEY} > /tmp/$1.key
+			echo ${GIT_CRYPT_KEY} | xxd -ps -d > /tmp/$1.key
 		fi
 	fi
 	return 0
